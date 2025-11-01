@@ -9,7 +9,7 @@ public class WordNet {
     private Digraph g;
     private ArrayList<LinkedList<Integer>> adjList; // WordNet adjacency list
     private ArrayList<String[]> synsetWordsST; // ST of <synset ID, words>
-    private HashMap<String, Integer> wordSynsetST; // ST of <word, synset ID>
+    private HashMap<String, ArrayList<Integer>> wordSynsetST; // ST of <word, synset IDs>
     private ShortestCommonAncestor scaObj; // ShortestCommonAncestor
 
     // constructor takes the name of the two input files
@@ -32,8 +32,15 @@ public class WordNet {
 
             adjList.add(new LinkedList<>());
             synsetWordsST.add(synset);
+
             for (String word : synset)
-                wordSynsetST.put(word, synsetId);
+                if (wordSynsetST.containsKey(word))
+                    wordSynsetST.get(word).add(synsetId);
+                else {
+                    ArrayList<Integer> IDs = new ArrayList<Integer>();
+                    IDs.add(synsetId);
+                    wordSynsetST.put(word, IDs);
+                }
         }
         synsetsStream.close();
 
@@ -81,12 +88,12 @@ public class WordNet {
             throw new IllegalArgumentException(
                     "Cannot call sca with words not in WordNet");
 
-        int noun1SynsetId = wordSynsetST.get(noun1);
-        int noun2SynsetId = wordSynsetST.get(noun2);
+        ArrayList<Integer> noun1SynsetId = wordSynsetST.get(noun1);
+        ArrayList<Integer>  noun2SynsetId = wordSynsetST.get(noun2);
 
-        System.out.println(scaObj.ancestor(noun1SynsetId, noun2SynsetId));
+        System.out.println(scaObj.ancestorSubset(noun1SynsetId, noun2SynsetId));
 
-        return synsetWordsST.get(scaObj.ancestor(noun1SynsetId, noun2SynsetId))[0];
+        return synsetWordsST.get(scaObj.ancestorSubset(noun1SynsetId, noun2SynsetId))[0];
     }
 
     // distance between noun1 and noun2 (defined below)
@@ -95,10 +102,10 @@ public class WordNet {
             throw new IllegalArgumentException(
                     "Cannot call distance with words not in WordNet");
 
-        int noun1SynsetId = wordSynsetST.get(noun1);
-        int noun2SynsetId = wordSynsetST.get(noun2);
+        ArrayList<Integer> noun1SynsetId = wordSynsetST.get(noun1);
+        ArrayList<Integer>  noun2SynsetId = wordSynsetST.get(noun2);
 
-        int distance = scaObj.length(noun1SynsetId, noun2SynsetId);
+        int distance = scaObj.lengthSubset(noun1SynsetId, noun2SynsetId);
 
         return distance;
     }
@@ -107,7 +114,7 @@ public class WordNet {
     public static void main(String[] args) {
 
         WordNet w = new WordNet("synsets.txt", "hypernyms.txt");
-        System.out.print(w.sca("clown", "penny"));
+        System.out.print(w.sca("town", "village"));
     }
 
 }
