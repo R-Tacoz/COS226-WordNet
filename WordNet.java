@@ -21,7 +21,7 @@ public class WordNet {
         synsetWordsST = new ArrayList<>();
         wordSynsetST = new HashMap<>();
 
-        scaObj = new ShortestCommonAncestor(new Digraph(10));
+
 
         // read synsets file to initialize adjList and fill symbol tables
         In synsetsStream = new In(synsets);
@@ -37,14 +37,21 @@ public class WordNet {
         }
         synsetsStream.close();
 
+        Digraph G = new Digraph(adjList.size());
+
         // read hypernyms file to fill adjList
         In hypernymsStream = new In(hypernyms);
         while (!hypernymsStream.isEmpty()) {
             String[] line = hypernymsStream.readLine().split(",");
             int synsetId = Integer.parseInt(line[0]);
-            for (int i = 1; i < line.length; i++)
-                adjList.get(synsetId).add(Integer.parseInt(line[i]));
+            int hypernym;
+            for (int i = 1; i < line.length; i++) {
+                hypernym = Integer.parseInt(line[i]);
+                G.addEdge(synsetId, hypernym);
+                adjList.get(synsetId).add(hypernym);
+            }
         }
+        scaObj = new ShortestCommonAncestor(G);
         hypernymsStream.close();
 
         // for (int i : adjList.get(0))
@@ -77,9 +84,9 @@ public class WordNet {
         int noun1SynsetId = wordSynsetST.get(noun1);
         int noun2SynsetId = wordSynsetST.get(noun2);
 
-        scaObj.ancestor(noun1SynsetId, noun2SynsetId);
+        System.out.println(scaObj.ancestor(noun1SynsetId, noun2SynsetId));
 
-        return null;
+        return synsetWordsST.get(scaObj.ancestor(noun1SynsetId, noun2SynsetId))[0];
     }
 
     // distance between noun1 and noun2 (defined below)
@@ -100,6 +107,7 @@ public class WordNet {
     public static void main(String[] args) {
 
         WordNet w = new WordNet("synsets.txt", "hypernyms.txt");
+        System.out.print(w.sca("clown", "penny"));
     }
 
 }
