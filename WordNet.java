@@ -114,7 +114,8 @@ public class WordNet {
     public static void main(String[] args) {
 
         WordNet w = new WordNet("synsets.txt", "hypernyms.txt");
-        System.out.print(w.sca("town", "village"));
+        System.out.println(w.sca("Black_Plague", "black_marlin"));
+        System.out.println(w.distance("Black_Plague", "black_marlin"));
     }
 
 }

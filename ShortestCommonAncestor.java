@@ -2,6 +2,9 @@ import java.util.Iterator;
 
 import edu.princeton.cs.algs4.Digraph;
 import edu.princeton.cs.algs4.Queue;
+import edu.princeton.cs.algs4.In;
+import edu.princeton.cs.algs4.StdOut;
+import edu.princeton.cs.algs4.StdIn;
 
 public class ShortestCommonAncestor {
     // The argument to the constructor is not a rooted DAG
@@ -37,6 +40,10 @@ public class ShortestCommonAncestor {
         inquiryID++;
         q.enqueue(new triple(v, 0, true));
         q.enqueue(new triple(w, 0, false));
+        visited[v] = inquiryID;
+        visited[w] = inquiryID;
+        distance[v] = 0;
+        distance[w] = 0;
         while (!q.isEmpty()){
             triple node = q.dequeue();
             for (int i : Graph.adj(node.node)) {
@@ -44,7 +51,7 @@ public class ShortestCommonAncestor {
                     return node.distance+distance[i]+1;
                 }
                 visited[i] = inquiryID;
-                distance[i] = node.distance;
+                distance[i] = node.distance+1;
                 triple nextpair = new triple(i, node.distance+1, node.a);
                 q.enqueue(nextpair);
             }
@@ -67,6 +74,10 @@ public class ShortestCommonAncestor {
         inquiryID++;
         q.enqueue(new triple(v, 0, true));
         q.enqueue(new triple(w, 0, false));
+        visited[v] = inquiryID;
+        visited[w] = inquiryID;
+        distance[v] = 0;
+        distance[w] = 0;
         while (!q.isEmpty()){
             triple word = q.dequeue();
             for (int i : Graph.adj(word.node)) {
@@ -74,7 +85,7 @@ public class ShortestCommonAncestor {
                     return i;
                 }
                 visited[i] = inquiryID;
-                distance[i] = word.distance;
+                distance[i] = word.distance+1;
                 triple nextpair = new triple(i, word.distance+1, word.a);
                 q.enqueue(nextpair);
             }
@@ -97,8 +108,19 @@ public class ShortestCommonAncestor {
             throw new IllegalArgumentException("lengthSubset cannot take empty sets");
         Queue<triple> q = new Queue<triple>();
         inquiryID++;
-        for (int i : subsetA)  q.enqueue(new triple(i, 0, true));
-        for (int i : subsetB)  q.enqueue(new triple(i, 0, false));
+        for (int i : subsetA)  {
+            q.enqueue(new triple(i, 0, true));
+            visited[i] = inquiryID;
+            distance[i] = 0;
+            aList[i] = true;
+        }
+        for (int i : subsetB) {
+            q.enqueue(new triple(i, 0, false));
+            visited[i] = inquiryID;
+            distance[i] = 0;
+            aList[i] = false;
+        }
+
         while (!q.isEmpty()){
             triple node = q.dequeue();
             for (int i : Graph.adj(node.node)) {
@@ -106,7 +128,7 @@ public class ShortestCommonAncestor {
                     return node.distance+distance[i]+1;
 
                 visited[i] = inquiryID;
-                distance[i] = node.distance;
+                distance[i] = node.distance+1;
                 aList[i] = node.a;
                 triple nextpair = new triple(i, node.distance+1, node.a);
                 q.enqueue(nextpair);
@@ -130,8 +152,18 @@ public class ShortestCommonAncestor {
 
         Queue<triple> q = new Queue<triple>();
         inquiryID++;
-        for (int i : subsetA)  q.enqueue(new triple(i, 0, true));
-        for (int i : subsetB)  q.enqueue(new triple(i, 0, false));
+        for (int i : subsetA)  {
+            q.enqueue(new triple(i, 0, true));
+            visited[i] = inquiryID;
+            distance[i] = 0;
+            aList[i] = true;
+        }
+        for (int i : subsetB) {
+            q.enqueue(new triple(i, 0, false));
+            visited[i] = inquiryID;
+            distance[i] = 0;
+            aList[i] = false;
+        }
         while (!q.isEmpty()){
             triple node = q.dequeue();
             for (int i : Graph.adj(node.node)) {
@@ -151,7 +183,16 @@ public class ShortestCommonAncestor {
 
     // unit testing (required)
     public static void main(String[] args) {
-
+        In in = new In(args[0]);
+        Digraph G = new Digraph(in);
+        ShortestCommonAncestor sca = new ShortestCommonAncestor(G);
+        while (!StdIn.isEmpty()) {
+            int v = StdIn.readInt();
+            int w = StdIn.readInt();
+            int length   = sca.length(v, w);
+            int ancestor = sca.ancestor(v, w);
+            StdOut.printf("length = %d, ancestor = %d\n", length, ancestor);
+        }
     }
 
 }
